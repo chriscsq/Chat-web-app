@@ -3,6 +3,9 @@ let app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
+
+//app.use(cookieParser());
+
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res) {
@@ -17,26 +20,29 @@ http.listen(3000, function() {
     console.log('listening on *:3000');
 });
 
-var today = new Date();
-var hours;
-var minutes;
 
-setInterval(updateTime, 60000);
-function updateTime() {
-    hours = today.getHours() % 12 || 12
-    minutes = today.getMinutes()
-    console.log('update time');
-}
-
-onload = function() {
-    updateTime();
-}
 io.on('connection', function(socket){
-    socket.on('chat message', function(msg) {
-        console.log('message: ' + msg);
-        console.log("time: " + hours + ":" + minutes);
 
-        io.emit('chat message', hours + ":" + minutes + " - " + msg);
+    console.log(socket.id + " connected");
+    var user = {
+        socket: socket.id,
+        name: assignName(io.engine.clientsCount),
+    };
+    socket.on('chat message', function(msg) {
+        var today = new Date();
+        var hours = today.getHours() % 12 || 12
+        var minutes = (today.getMinutes() < 10) ? "0"+today.getMinutes() : today.getMinutes();
+    
+        io.emit('chat message', user.name + " " + hours  + ":" + minutes + " - " + msg);
+
+        /* Check message for chat commands
     });
 });
 
+function changeName(user, name) {
+    user.name = name
+}
+
+function assignName(id) {
+    return "User " + id;
+}

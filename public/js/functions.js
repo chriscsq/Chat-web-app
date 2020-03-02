@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    var socket = io();
+    //var socket = io();
+    var socket = io.connect('http://localhost:3000');
     $('form').submit(function(e) {
         var today = new Date();
         e.preventDefault();
