@@ -36,7 +36,7 @@ io.on('connection', function(socket){
         var hours = today.getHours() % 12 || 12
         var minutes = (today.getMinutes() < 10) ? "0"+today.getMinutes() : today.getMinutes();
     
-
+        
         // Should be the command 
         var chat_commands = msg.split(" ")[0]
         // The value for the command

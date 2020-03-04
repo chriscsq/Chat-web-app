@@ -6,6 +6,7 @@ $(document).ready(function() {
     $('form').submit(function(e) {
         e.preventDefault();
         var msg = $('#m').val()
+        console.log(msg)
         socket.emit('chat message', msg);
         $('#m').val('');
 
