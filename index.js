@@ -30,6 +30,7 @@ io.on('connection', function(socket){
 
     users.push(user);
 
+
     socket.on('chat message', function(msg) {
         var today = new Date();
         var hours = today.getHours() % 12 || 12
@@ -42,26 +43,35 @@ io.on('connection', function(socket){
         var command_value = msg.split(" ")[1]
         var invalid_input = msg.split(" ")[2]
 
-        console.log('invalid input: ' + invalid_input)
         /* Chat commands */
         if (chat_commands === "/nick") {
             if (isInvalidInput(invalid_input)){
-                socket.emit('chat message', "Invalid input, please check your command")
+                socket.emit('error message', "Invalid input, please check your command")
             } else if (isNameAvailable(command_value) === true) {
                 user.name = command_value
+
+                socket.emit('serverToClient', {
+                    name: user.name,
+                    color: user.color,
+                });
+
             } else {
-                socket.emit('chat message', "Name already taken")
+                socket.emit('error message', "Name already taken")
             }
         } else if (chat_commands === "/nickcolor") {
-            if (isInvalidInput(invalid_input)) {
-                socket.emit('chat message', "Invalid input, please check your command")
+            if (isInvalidInput(invalid_input) || !isHexColor(command_value)) {
+                socket.emit('error message', "Invalid input, please check your command")
             } else {
                 user.color = command_value;
+                socket.emit('serverToClient', {
+                    name: user.name,
+                    color: user.color,
+                });
             }
         } else if (chat_commands.charAt(0) === "/") {
-            socket.emit('chat message', 'Invalid command, please try again');
+            socket.emit('error message', 'Invalid command, please try again');
         } else {
-            io.emit('chat message', user.name + " " + hours  + ":" + minutes + " - " + msg);
+            io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
         }
 
 
@@ -73,8 +83,6 @@ function assignName(id) {
     var username = "User"+id
     while (!isNameAvailable(username)) {
         username = "User"+(id++)
-        console.log("incrementing user id")
-        console.log("Name will be: User"+(id++))
     }
     return username
 }
@@ -85,10 +93,10 @@ function isInvalidInput(invalid_input) {
     }
     return true
 }
+
 function isNameAvailable(name_to_check) {
     for (var i = 0; i < users.length; i++) {
         if (users[i].name === name_to_check) {
-            console.log("check name availability failed")
             return false;
         }
     }
@@ -96,3 +104,9 @@ function isNameAvailable(name_to_check) {
 }
 
 
+// Stole function to validate hex - https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation/8027444
+function isHexColor (hex) {
+    return typeof hex === 'string'
+        && hex.length === 6
+        && !isNaN(Number('0x' + hex))
+  }
