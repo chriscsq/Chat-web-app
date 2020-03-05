@@ -100,6 +100,8 @@ io.on('connection', function(socket){
                 io.emit('serverToClient', {
                     name: user.name,
                     color: user.color,
+                    userlist: refreshUserList(socket.id, "changecolor", user.name),
+
                 });
             }
         } else if (chat_commands.charAt(0) === "/") {
@@ -185,6 +187,11 @@ function refreshUserList(socketid, action, newnick) {
                 } else {
                     usernames.push(users[i].name)
                 }
+            }
+            break;
+        default:
+            for (let i = 0; i < users.length; i++) {
+                usernames.push(users[i].name)
             }
             break;
     }
