@@ -1,22 +1,50 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <link href="css/style.css" rel="stylesheet" />
-        <title>Chat</title>
-    </head>
-    
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/client.js"></script>
 
-    <body>
+  <head>
+    <link href="css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-        <ul id="messages"></ul>
-        <form action="">
-            <input id="m" autocomplete="off" /><button>Send</button>
-        </form>
-        
-    </body>
+    <title>Chat</title>
+  </head>
+
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/client.js"></script>
+
+  <body>
+    <div class="jumbotron vertical-center">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-9">
+            <h6>
+              Chat
+            </h6>
+            <div class="messages">
+              <ul id="messages">
+
+              </ul>
+            </div>
+            <form action="">
+              <input id="m" autocomplete="off"><button class="button-text">
+                Send
+              </button>
+            </form>
+
+          </div>
+          <div class="col-sm-3">
+            <h6>
+              Online Users
+            </h6>
+            <ul id="users">
+
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </body>
+
 </html>
-

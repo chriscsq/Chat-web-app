@@ -1,5 +1,7 @@
 var name
 var color
+var userlist
+
 $(document).ready(function() {
     //var socket = io();
     var socket = io.connect('http://localhost:3000');
@@ -11,6 +13,26 @@ $(document).ready(function() {
         $('#m').val('');
 
         return false;
+    });
+
+    socket.on('disconnected', function(data) {
+        console.log('disconnect event')
+        userlist = data
+
+        $('#users').empty()
+        for (var i = 0; i < userlist.length; i++) {
+            $('#users').append($('<li>').text(userlist[i]))
+        }
+    });
+
+    socket.on('connected', function(data) {
+        console.log('connected')
+        userlist = data
+
+        $('#users').empty()
+        for (var i = 0; i < userlist.length; i++) {
+            $('#users').append($('<li>').text(userlist[i]))
+        }
     });
 
     socket.on('chat message', function(msg) {
@@ -27,7 +49,14 @@ $(document).ready(function() {
         console.log("work")
         name = data.name
         color = data.color
+        userlist = data.userlist
+        console.log("userlist" + userlist)
+        $('#users').empty()
+
         console.log("name: " + name + " color: " + color)
+        for (var i = 0; i < userlist.length; i++) {
+            $('#users').append($('<li>').text(userlist[i]))
+        }
     });
 
 });

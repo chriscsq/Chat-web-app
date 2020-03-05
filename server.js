@@ -19,31 +19,49 @@ http.listen(3000, function() {
 });
 
 var users = new Array()
+
+
+
 io.on('connection', function(socket){
 
     console.log(socket.id + " connected");
     var user = {
         socket: socket.id,
-        name: assignName(io.engine.clientsCount),
+        name: assignName(1),
         color: "black",
     }
 
-    users.push(user);
+    users.push(user)
+    console.log(users)
+    var userlist = refreshUserList(socket.id, "connect", "")
+    io.emit('connected', userlist)
 
-
+    socket.on('disconnect', function() {
+        io.emit('disconnected', refreshUserList(socket.id, "disconnect", ""))
+        console.log(socket.id + " disconnected")
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].socket == socket.id) {
+                users.splice(i, 1)
+            }
+        }
+        console.log(users)
+        //userlist = refreshUserList(socket.id, "disconnect");
+    });
     socket.on('chat message', function(msg) {
         var today = new Date();
         var hours = today.getHours() % 12 || 12
         var minutes = (today.getMinutes() < 10) ? "0"+today.getMinutes() : today.getMinutes();
     
-        
-        // Should be the command 
+        /* 
+         * User input
+         */
         var chat_commands = msg.split(" ")[0]
-        // The value for the command
         var command_value = msg.split(" ")[1]
         var invalid_input = msg.split(" ")[2]
 
-        /* Chat commands */
+        /* 
+         * Command to change nickanme
+         */
         if (chat_commands === "/nick") {
             if (isInvalidInput(invalid_input)){
                 socket.emit('error message', "Invalid input, please check your command")
@@ -53,11 +71,17 @@ io.on('connection', function(socket){
                 socket.emit('serverToClient', {
                     name: user.name,
                     color: user.color,
+                    userlist: refreshUserList(socket.id, "changenick", user.name),
                 });
-
+                
             } else {
                 socket.emit('error message', "Name already taken")
             }
+
+        /* 
+         * Nickcolor command, checks for valid hexcolor 
+         */
+
         } else if (chat_commands === "/nickcolor") {
             if (isInvalidInput(invalid_input) || !isHexColor(command_value)) {
                 socket.emit('error message', "Invalid input, please check your command")
@@ -71,11 +95,16 @@ io.on('connection', function(socket){
         } else if (chat_commands.charAt(0) === "/") {
             socket.emit('error message', 'Invalid command, please try again');
         } else {
-            io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
+            /* Does not send empty messages */
+            if (msg != "") {
+                io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
+
+            }
         }
 
 
         console.log(users);
+        refreshUserList();
     });
 });
 
@@ -109,4 +138,38 @@ function isHexColor (hex) {
     return typeof hex === 'string'
         && hex.length === 6
         && !isNaN(Number('0x' + hex))
-  }
+}
+
+
+function refreshUserList(socketid, action, newnick) {
+    var usernames = []
+    switch (action) {
+        case "connect":
+            for (var i = 0; i < users.length; i++) {
+                usernames.push(users[i].name)
+            }
+            console.log('switch connect, here is a new list of usernames: ' + usernames )
+            break;
+        case "disconnect":
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].socket != socketid) {
+                    usernames.push(users[i].name)
+                }
+            }
+            console.log('switch disconnect here is a new list of usernames: ' + usernames)
+            break;
+        case "changenick":
+            for (var i = 0; i < users.length; i++) {
+                if (socketid === users[i].socket) {
+                    usernames.push(newnick)
+                } else {
+                    usernames.push(users[i].name)
+                }
+            }
+            console.log('switch changenick here is a new list of usernames: ' + usernames)
+            break;
+
+    }
+
+    return usernames;
+}
