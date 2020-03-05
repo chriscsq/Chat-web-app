@@ -1,4 +1,5 @@
 
+
 form input {
     border: 0; 
     padding: 10px; 
@@ -16,9 +17,15 @@ form button {
 }
 
 
+ul {
+    list-style-position: inside;
+
+}
 #messages {
   height: 400px;
   list-style-type: none; 
+  display: block;
+  overflow-y: scroll;
 
 }
 
@@ -30,7 +37,7 @@ form button {
 }
 .col-md-9{
   background-color: #ede9f0;
-
+  position: absolute;
   padding: 10px;
   border-radius: 10px;
 }

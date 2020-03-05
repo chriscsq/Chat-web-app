@@ -13,6 +13,7 @@ $(document).ready(function() {
         console.log(msg)
         socket.emit('chat message', msg);
         $('#m').val('');
+        $("#messages").scrollTop($("#messages")[0].scrollHeight);
 
         return false;
     });
@@ -47,7 +48,8 @@ $(document).ready(function() {
     socket.on('chat message', function(msg) {
         var hex = "#"+color
         $('#messages').append($('<li>').text(msg).css("color",hex))
-        
+       // console.log(msg.socketid + " name: " + msg.name)
+        //$('#messages').html('<div id="'+msg.socketid+'">'+msg.name +'</div> ' + msg.hours + ":" + msg.minutes + " - " + msg)
     });
 
     socket.on('error message', function(error) {

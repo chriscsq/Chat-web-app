@@ -106,8 +106,17 @@ io.on('connection', function(socket){
                 color = user.color;
                 socketid = user.socket;
                 name = user.name;
+                console.log("form server - id: " + user.socket + " name: " + user.name)
                 io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
-
+                /*io.emit('chat message', {
+                    name: user.name,
+                    hours: hours,
+                    minutes: minutes,
+                    color: user.color,
+                    msg: msg,
+                    socketid: user.socket,
+                });
+                */
             }
         }
         refreshUserList();
