@@ -1,27 +1,30 @@
-var name
-var color
-var userlist
+let name
+let color
+let userlist
 
 $(document).ready(function() {
-    //var socket = io();
+    //let socket = io();
 
     console.log("connected!!")
-    var socket = io.connect('http://localhost:3000');
+    let socket = io.connect('http://localhost:3000');
     $('form').submit(function(e) {
         e.preventDefault();
-        var msg = $('#m').val()
+        let msg = $('#m').val()
         console.log(msg)
         socket.emit('chat message', msg);
         $('#m').val('');
-        $("#messages").scrollTop($("#messages")[0].scrollHeight);
 
         return false;
     });
 
-    socket.on('lmao', function(data) {
-        console.log("lmao")
-        console.log(data)
-        $('#chat-header').text("Your name is: " + data)
+    socket.on('populate_history', function(chathistory) {
+        $('#messages').empty()
+        for (let i = 0; i < chathistory.length; i++) {
+            $('#messages').append($('<li>').text(chathistory[i]))
+            
+        }
+        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+
     });
 
     socket.on('disconnected', function(data) {
@@ -29,25 +32,35 @@ $(document).ready(function() {
         userlist = data
 
         $('#users').empty()
-        for (var i = 0; i < userlist.length; i++) {
+        for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });
 
+    socket.on('send_user_list', function(data) {
+        userlist = data
+        console.log("connected")
+        $('#users').empty()
+        for (let i = 0; i < userlist.length; i++) {
+            $('#users').append($('<li>').text(userlist[i]))
+        }
+    });
     socket.on('connected', function(data) {
         userlist = data.userlist
         console.log("connected")
         $('#chat-header').text("Your name is: " + data.name)
 
         $('#users').empty()
-        for (var i = 0; i < userlist.length; i++) {
+        for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });
 
     socket.on('chat message', function(msg) {
-        var hex = "#"+color
+        let hex = "#"+color
         $('#messages').append($('<li>').text(msg).css("color",hex))
+        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+
        // console.log(msg.socketid + " name: " + msg.name)
         //$('#messages').html('<div id="'+msg.socketid+'">'+msg.name +'</div> ' + msg.hours + ":" + msg.minutes + " - " + msg)
     });
@@ -65,7 +78,7 @@ $(document).ready(function() {
         $('#users').empty()
         $('#chat-header').text("Your name is: " + name)
         console.log("name: " + name + " color: " + color)
-        for (var i = 0; i < userlist.length; i++) {
+        for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });

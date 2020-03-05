@@ -1,7 +1,7 @@
 let express = require('express');
 let app = express();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+let http = require('http').createServer(app);
+let io = require('socket.io')(http);
 
 //app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
@@ -15,26 +15,30 @@ http.listen(3000, function() {
     console.log('listening on *:3000');
 });
 
-var users = new Array()
-
+let users = new Array()
+let history = new Array()
 
 
 io.on('connection', function(socket){
 
-    var user = {
+    let user = {
         socket: socket.id,
         name: assignName(1),
         color: "black",
     }
 
     users.push(user)
-    var userlist = refreshUserList(socket.id, "connect", "")
+    let userlist = refreshUserList(socket.id, "connect", "")
     //io.emit('connected', userlist)
     io.to(`${socket.id}`).emit('connected', {
         userlist: userlist,
         name: user.name,
     });
-    var username = user.name
+
+    io.to(`${socket.id}`).emit('populate_history', history)
+    io.emit('send_user_list', userlist)
+
+    let username = user.name
     console.log(username)
     /*
     socket.on('connected', function() {
@@ -45,7 +49,7 @@ io.on('connection', function(socket){
     */
     socket.on('disconnect', function() {
         io.emit('disconnected', refreshUserList(socket.id, "disconnect", ""))
-        for (var i = 0; i < users.length; i++) {
+        for (let i = 0; i < users.length; i++) {
             if (users[i].socket == socket.id) {
                 users.splice(i, 1)
             }
@@ -54,16 +58,16 @@ io.on('connection', function(socket){
         //userlist = refreshUserList(socket.id, "disconnect");
     });
     socket.on('chat message', function(msg) {
-        var today = new Date();
-        var hours = today.getHours() % 12 || 12
-        var minutes = (today.getMinutes() < 10) ? "0"+today.getMinutes() : today.getMinutes();
+        let today = new Date();
+        let hours = today.getHours() % 12 || 12
+        let minutes = (today.getMinutes() < 10) ? "0"+today.getMinutes() : today.getMinutes();
     
         /* 
          * User input
          */
-        var chat_commands = msg.split(" ")[0]
-        var command_value = msg.split(" ")[1]
-        var invalid_input = msg.split(" ")[2]
+        let chat_commands = msg.split(" ")[0]
+        let command_value = msg.split(" ")[1]
+        let invalid_input = msg.split(" ")[2]
 
         /* 
          * Command to change nickanme
@@ -107,7 +111,9 @@ io.on('connection', function(socket){
                 socketid = user.socket;
                 name = user.name;
                 console.log("form server - id: " + user.socket + " name: " + user.name)
-                io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
+                let savedmessage = user.name +  " " + hours  + ":" + minutes + " - " + msg
+                io.emit('chat message',  savedmessage);
+                history.push(savedmessage)
                 /*io.emit('chat message', {
                     name: user.name,
                     hours: hours,
@@ -117,6 +123,7 @@ io.on('connection', function(socket){
                     socketid: user.socket,
                 });
                 */
+               console.log(history)
             }
         }
         refreshUserList();
@@ -124,7 +131,7 @@ io.on('connection', function(socket){
 });
 
 function assignName(id) {
-    var username = "User"+id
+    let username = "User"+id
     while (!isNameAvailable(username)) {
         username = "User"+(id++)
     }
@@ -139,7 +146,7 @@ function isInvalidInput(invalid_input) {
 }
 
 function isNameAvailable(name_to_check) {
-    for (var i = 0; i < users.length; i++) {
+    for (let i = 0; i < users.length; i++) {
         if (users[i].name === name_to_check) {
             return false;
         }
@@ -157,22 +164,22 @@ function isHexColor (hex) {
 
 
 function refreshUserList(socketid, action, newnick) {
-    var usernames = []
+    let usernames = []
     switch (action) {
         case "connect":
-            for (var i = 0; i < users.length; i++) {
+            for (let i = 0; i < users.length; i++) {
                 usernames.push(users[i].name)
             }
             break;
         case "disconnect":
-            for (var i = 0; i < users.length; i++) {
+            for (let i = 0; i < users.length; i++) {
                 if (users[i].socket != socketid) {
                     usernames.push(users[i].name)
                 }
             }
             break;
         case "changenick":
-            for (var i = 0; i < users.length; i++) {
+            for (let i = 0; i < users.length; i++) {
                 if (socketid === users[i].socket) {
                     usernames.push(newnick)
                 } else {

@@ -19,14 +19,17 @@ form button {
 
 ul {
     list-style-position: inside;
-
 }
+
+/* id are .
+class are #
+*/
+
 #messages {
   height: 400px;
   list-style-type: none; 
   display: block;
   overflow-y: scroll;
-
 }
 
 .messages {
