@@ -4,6 +4,8 @@ var userlist
 
 $(document).ready(function() {
     //var socket = io();
+
+    console.log("connected!!")
     var socket = io.connect('http://localhost:3000');
     $('form').submit(function(e) {
         e.preventDefault();
@@ -13,6 +15,12 @@ $(document).ready(function() {
         $('#m').val('');
 
         return false;
+    });
+
+    socket.on('lmao', function(data) {
+        console.log("lmao")
+        console.log(data)
+        $('#chat-header').text("Your name is: " + data)
     });
 
     socket.on('disconnected', function(data) {
@@ -26,8 +34,9 @@ $(document).ready(function() {
     });
 
     socket.on('connected', function(data) {
-        console.log('connected')
-        userlist = data
+        userlist = data.userlist
+        console.log("connected")
+        $('#chat-header').text("Your name is: " + data.name)
 
         $('#users').empty()
         for (var i = 0; i < userlist.length; i++) {
@@ -52,7 +61,7 @@ $(document).ready(function() {
         userlist = data.userlist
         console.log("userlist" + userlist)
         $('#users').empty()
-
+        $('#chat-header').text("Your name is: " + name)
         console.log("name: " + name + " color: " + color)
         for (var i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))

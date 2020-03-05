@@ -3,10 +3,7 @@ let app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
-
-
 //app.use(cookieParser());
-
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res) {
@@ -24,7 +21,6 @@ var users = new Array()
 
 io.on('connection', function(socket){
 
-    console.log(socket.id + " connected");
     var user = {
         socket: socket.id,
         name: assignName(1),
@@ -32,13 +28,23 @@ io.on('connection', function(socket){
     }
 
     users.push(user)
-    console.log(users)
     var userlist = refreshUserList(socket.id, "connect", "")
-    io.emit('connected', userlist)
-
+    //io.emit('connected', userlist)
+    io.to(`${socket.id}`).emit('connected', {
+        userlist: userlist,
+        name: user.name,
+    });
+    var username = user.name
+    console.log(username)
+    /*
+    socket.on('connected', function() {
+        console.log("this should work")
+        console.log("username: " + username)
+        socket.emit('connected', username)
+    });
+    */
     socket.on('disconnect', function() {
         io.emit('disconnected', refreshUserList(socket.id, "disconnect", ""))
-        console.log(socket.id + " disconnected")
         for (var i = 0; i < users.length; i++) {
             if (users[i].socket == socket.id) {
                 users.splice(i, 1)
@@ -68,7 +74,7 @@ io.on('connection', function(socket){
             } else if (isNameAvailable(command_value) === true) {
                 user.name = command_value
 
-                socket.emit('serverToClient', {
+                io.to(`${socket.id}`).emit('serverToClient', {
                     name: user.name,
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changenick", user.name),
@@ -87,7 +93,7 @@ io.on('connection', function(socket){
                 socket.emit('error message', "Invalid input, please check your command")
             } else {
                 user.color = command_value;
-                socket.emit('serverToClient', {
+                io.emit('serverToClient', {
                     name: user.name,
                     color: user.color,
                 });
@@ -97,13 +103,13 @@ io.on('connection', function(socket){
         } else {
             /* Does not send empty messages */
             if (msg != "") {
+                color = user.color;
+                socketid = user.socket;
+                name = user.name;
                 io.emit('chat message',  user.name +  " " + hours  + ":" + minutes + " - " + msg);
 
             }
         }
-
-
-        console.log(users);
         refreshUserList();
     });
 });
@@ -148,7 +154,6 @@ function refreshUserList(socketid, action, newnick) {
             for (var i = 0; i < users.length; i++) {
                 usernames.push(users[i].name)
             }
-            console.log('switch connect, here is a new list of usernames: ' + usernames )
             break;
         case "disconnect":
             for (var i = 0; i < users.length; i++) {
@@ -156,7 +161,6 @@ function refreshUserList(socketid, action, newnick) {
                     usernames.push(users[i].name)
                 }
             }
-            console.log('switch disconnect here is a new list of usernames: ' + usernames)
             break;
         case "changenick":
             for (var i = 0; i < users.length; i++) {
@@ -166,9 +170,7 @@ function refreshUserList(socketid, action, newnick) {
                     usernames.push(users[i].name)
                 }
             }
-            console.log('switch changenick here is a new list of usernames: ' + usernames)
             break;
-
     }
 
     return usernames;
