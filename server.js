@@ -143,8 +143,14 @@ io.on('connection', function(socket){
                 color = user.color;
                 socketid = user.socket;
                 name = user.name;
-                let savedmessage = user.name +  " " + hours  + ":" + minutes + " - " + msg
-                io.emit('chat message',  savedmessage);
+                let savedmessage = name +  " " + hours  + ":" + minutes + " - " + msg
+                
+                io.emit('chat message',  {
+                    color: user.color,
+                    socketid: user.socket,
+                    name: user.name,
+                    messagecontent: " " + hours  + ":" + minutes + " - " + msg,
+                });
                 history.push(savedmessage)
 
             }
