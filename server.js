@@ -39,7 +39,6 @@ io.on('connection', function(socket){
     io.emit('send_user_list', userlist)
 
     let username = user.name
-    console.log(username)
     /*
     socket.on('connected', function() {
         console.log("this should work")
@@ -47,6 +46,37 @@ io.on('connection', function(socket){
         socket.emit('connected', username)
     });
     */
+
+    socket.on('cookiehandler', function(data) {
+
+        if (data == null) {
+            //user.name = assignName(1)
+            io.to(`${socket.id}`).emit('serverToClient', {
+                name: user.name,
+                color: user.color,
+                userlist: refreshUserList(socket.id, "changenick", user.name),
+            });
+
+        } else if (data != user.name) {
+            /* See if name is taken during disconnect */
+            if (isNameAvailable(data)) {
+                user.name = data
+            } else {
+                user.name = assignName(1)
+            }
+
+            io.to(`${socket.id}`).emit('serverToClient', {
+    
+                name: user.name,
+                color: user.color,
+                userlist: refreshUserList(socket.id, "changenick", user.name),
+                
+            });
+            io.emit('send_user_list', refreshUserList(socket.id, "changenick", user.name))
+
+        }
+    });
+
     socket.on('disconnect', function() {
         io.emit('disconnected', refreshUserList(socket.id, "disconnect", ""))
         for (let i = 0; i < users.length; i++) {
@@ -54,7 +84,6 @@ io.on('connection', function(socket){
                 users.splice(i, 1)
             }
         }
-        console.log(users)
         //userlist = refreshUserList(socket.id, "disconnect");
     });
     socket.on('chat message', function(msg) {
@@ -83,6 +112,8 @@ io.on('connection', function(socket){
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changenick", user.name),
                 });
+
+                io.emit('send_user_list', refreshUserList(socket.id, "changenick", user.name))
                 
             } else {
                 socket.emit('error message', "Name already taken")
@@ -112,20 +143,16 @@ io.on('connection', function(socket){
                 color = user.color;
                 socketid = user.socket;
                 name = user.name;
-                console.log("form server - id: " + user.socket + " name: " + user.name)
-                let savedmessage = user.name +  " " + hours  + ":" + minutes + " - " + msg
-                io.emit('chat message',  savedmessage);
-                history.push(savedmessage)
-                /*io.emit('chat message', {
-                    name: user.name,
-                    hours: hours,
-                    minutes: minutes,
+                let savedmessage = name +  " " + hours  + ":" + minutes + " - " + msg
+                
+                io.emit('chat message',  {
                     color: user.color,
-                    msg: msg,
                     socketid: user.socket,
+                    name: user.name,
+                    messagecontent: " " + hours  + ":" + minutes + " - " + msg,
                 });
-                */
-               console.log(history)
+                history.push(savedmessage)
+
             }
         }
         refreshUserList();

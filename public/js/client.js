@@ -5,17 +5,27 @@ let userlist
 $(document).ready(function() {
     //let socket = io();
 
-    console.log("connected!!")
     let socket = io.connect('http://localhost:3000');
     $('form').submit(function(e) {
         e.preventDefault();
         let msg = $('#m').val()
-        console.log(msg)
         socket.emit('chat message', msg);
         $('#m').val('');
 
         return false;
     });
+
+    if (name != "undefined") {
+        name = Cookies.get('user')
+    }
+
+    socket.on('connect', function() {
+        let cookie = Cookies.get('user')
+        socket.emit('cookiehandler', cookie)
+
+    })
+
+
 
     socket.on('populate_history', function(chathistory) {
         $('#messages').empty()
@@ -39,17 +49,16 @@ $(document).ready(function() {
 
     socket.on('send_user_list', function(data) {
         userlist = data
-        console.log("connected")
         $('#users').empty()
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });
+
     socket.on('connected', function(data) {
         userlist = data.userlist
-        console.log("connected")
         $('#chat-header').text("Your name is: " + data.name)
-
+        Cookies.set('user', data.name, {expires: 365})
         $('#users').empty()
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
@@ -57,8 +66,16 @@ $(document).ready(function() {
     });
 
     socket.on('chat message', function(msg) {
-        let hex = "#"+color
-        $('#messages').append($('<li>').text(msg).css("color",hex))
+        let hex = "#"+msg.color
+       // $('#msgfrom').attr('id',msg.socketid)
+        //$('#msgfrom').html(msg.name).css('color',hex)
+        if (socket.id === msg.socketid) {
+            $('#messages').append('<li><span class="msgfrom" style="color:'+hex+';font-weight:bold" id="'+msg.socketid+'">' + msg.name + '</span>' + msg.messagecontent + '</li>')
+
+        } else {
+            $('#messages').append('<li><span class="msgfrom" style="color:'+hex+';" id="'+msg.socketid+'">' + msg.name + '</span>' + msg.messagecontent + '</li>')
+
+        }
         $("#messages").scrollTop($("#messages")[0].scrollHeight);
 
        // console.log(msg.socketid + " name: " + msg.name)
@@ -70,14 +87,14 @@ $(document).ready(function() {
     })
 
     socket.on('serverToClient', function(data) {
-        console.log("work")
         name = data.name
         color = data.color
         userlist = data.userlist
-        console.log("userlist" + userlist)
         $('#users').empty()
+        console.log('dataname in servertoclient ' + data.name)
+        Cookies.set('user', data.name, {expires: 365})
+    
         $('#chat-header').text("Your name is: " + name)
-        console.log("name: " + name + " color: " + color)
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }

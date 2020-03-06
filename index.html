@@ -8,7 +8,7 @@
 
     <title>Chat</title>
   </head>
-
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/client.js"></script>
@@ -22,8 +22,9 @@
               
             </h6>
             <div class="messages">
-              <ul id="messages">
 
+                <ul id="messages">
+                  <li class="msg"><div class="msgfrom"></div></li>
               </ul>
             </div>
             <div class="user-input">
