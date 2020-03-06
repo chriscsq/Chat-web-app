@@ -50,18 +50,21 @@ io.on('connection', function(socket){
     socket.on('cookiehandler', function(data) {
 
         if (data == null) {
-            console.log('cookie data is null')
             //user.name = assignName(1)
             io.to(`${socket.id}`).emit('serverToClient', {
-    
                 name: user.name,
                 color: user.color,
                 userlist: refreshUserList(socket.id, "changenick", user.name),
             });
 
         } else if (data != user.name) {
-            console.log('cookie data is not null, it is : ' + data)
-            user.name = data
+            /* See if name is taken during disconnect */
+            if (isNameAvailable(data)) {
+                user.name = data
+            } else {
+                user.name = assignName(1)
+            }
+
             io.to(`${socket.id}`).emit('serverToClient', {
     
                 name: user.name,
@@ -109,6 +112,8 @@ io.on('connection', function(socket){
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changenick", user.name),
                 });
+
+                io.emit('send_user_list', refreshUserList(socket.id, "changenick", user.name))
                 
             } else {
                 socket.emit('error message', "Name already taken")

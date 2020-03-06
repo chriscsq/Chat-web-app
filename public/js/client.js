@@ -18,11 +18,9 @@ $(document).ready(function() {
     if (name != "undefined") {
         name = Cookies.get('user')
     }
+    
     socket.on('connect', function() {
-        console.log('connection from ' + socket.id)
-        console.log(Cookies.get('user'))
         let cookie = Cookies.get('user')
-        //console.log('Here is my cookie in the connect function on the client - ' + Cookies.get('user'))
         socket.emit('cookiehandler', cookie)
 
     })
@@ -56,7 +54,7 @@ $(document).ready(function() {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });
-    
+
     socket.on('connected', function(data) {
         userlist = data.userlist
         $('#chat-header').text("Your name is: " + data.name)
