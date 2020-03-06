@@ -79,7 +79,9 @@ $(document).ready(function() {
     });
 
     socket.on('error message', function(error) {
-        $('#messages').append($('<li>').text(error))
+        $('#messages').append($('<li>').text(error).css('color','red'))
+        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+
     })
 
     socket.on('serverToClient', function(data) {
