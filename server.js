@@ -128,7 +128,7 @@ io.on('connection', function(socket){
                 socket.emit('error message', "Invalid input, please check your command")
             } else {
                 user.color = command_value;
-                io.emit('serverToClient', {
+                io.to(`${socket.id}`).emit('serverToClient', {
                     name: user.name,
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changecolor", user.name),
