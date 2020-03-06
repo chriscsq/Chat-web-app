@@ -30,16 +30,20 @@ io.on('connection', function(socket){
     users.push(user)
     let userlist = refreshUserList(socket.id, "connect", "")
     //io.emit('connected', userlist)
+    
     io.to(`${socket.id}`).emit('connected', {
-        userlist: userlist,
+        userlist: userlist ,
         name: user.name,
+        socketid: user.socket,
     });
 
+    
     io.to(`${socket.id}`).emit('populate_history', history)
-    io.emit('send_user_list', userlist)
+    socket.emit('send_user_list', {
+        userlist: refreshUserList(socket.id, "changenick", user.name),
+        name: user.name,
+    })
 
-    let username = user.name
-    console.log(username)
     /*
     socket.on('connected', function() {
         console.log("this should work")
@@ -47,6 +51,25 @@ io.on('connection', function(socket){
         socket.emit('connected', username)
     });
     */
+
+    socket.on('change_name', function(name) {
+        console.log("here i am a " + name)
+        if (name === "undefined") {
+            console.log("i am undefined")
+            user.name = assignName(1)
+        } else {
+            user.name = name
+        }      
+        io.to(`${socket.id}`).emit('send_user_list', {
+              userlist: userlist = refreshUserList(socket.id, "changenick", user.name),
+              name: name,
+          });
+
+    });
+    socket.on('name_taken', function() {
+        user.name = assignName(1)
+    });
+
     socket.on('disconnect', function() {
         io.emit('disconnected', refreshUserList(socket.id, "disconnect", ""))
         for (let i = 0; i < users.length; i++) {
@@ -82,6 +105,7 @@ io.on('connection', function(socket){
                     name: user.name,
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changenick", user.name),
+                    socketid: user.socket,
                 });
                 
             } else {
@@ -101,7 +125,7 @@ io.on('connection', function(socket){
                     name: user.name,
                     color: user.color,
                     userlist: refreshUserList(socket.id, "changecolor", user.name),
-
+                    socketid: user.socket,
                 });
             }
         } else if (chat_commands.charAt(0) === "/") {
