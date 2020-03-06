@@ -5,17 +5,29 @@ let userlist
 $(document).ready(function() {
     //let socket = io();
 
-    console.log("connected!!")
     let socket = io.connect('http://localhost:3000');
     $('form').submit(function(e) {
         e.preventDefault();
         let msg = $('#m').val()
-        console.log(msg)
         socket.emit('chat message', msg);
         $('#m').val('');
 
         return false;
     });
+
+    if (name != "undefined") {
+        name = Cookies.get('user')
+    }
+    socket.on('connect', function() {
+        console.log('connection from ' + socket.id)
+        console.log(Cookies.get('user'))
+        let cookie = Cookies.get('user')
+        //console.log('Here is my cookie in the connect function on the client - ' + Cookies.get('user'))
+        socket.emit('cookiehandler', cookie)
+
+    })
+
+
 
     socket.on('populate_history', function(chathistory) {
         $('#messages').empty()
@@ -39,17 +51,16 @@ $(document).ready(function() {
 
     socket.on('send_user_list', function(data) {
         userlist = data
-        console.log("connected")
         $('#users').empty()
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
     });
+    
     socket.on('connected', function(data) {
         userlist = data.userlist
-        console.log("connected")
         $('#chat-header').text("Your name is: " + data.name)
-
+        Cookies.set('user', data.name, {expires: 365})
         $('#users').empty()
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
@@ -70,14 +81,14 @@ $(document).ready(function() {
     })
 
     socket.on('serverToClient', function(data) {
-        console.log("work")
         name = data.name
         color = data.color
         userlist = data.userlist
-        console.log("userlist" + userlist)
         $('#users').empty()
+        console.log('dataname in servertoclient ' + data.name)
+        Cookies.set('user', data.name, {expires: 365})
+    
         $('#chat-header').text("Your name is: " + name)
-        console.log("name: " + name + " color: " + color)
         for (let i = 0; i < userlist.length; i++) {
             $('#users').append($('<li>').text(userlist[i]))
         }
