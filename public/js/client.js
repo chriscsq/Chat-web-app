@@ -67,8 +67,6 @@ $(document).ready(function() {
 
     socket.on('chat message', function(msg) {
         let hex = "#"+msg.color
-       // $('#msgfrom').attr('id',msg.socketid)
-        //$('#msgfrom').html(msg.name).css('color',hex)
         if (socket.id === msg.socketid) {
             $('#messages').append('<li><span class="msgfrom" style="color:'+hex+';font-weight:bold" id="'+msg.socketid+'">' + msg.name + '</span>' + msg.messagecontent + '</li>')
 
@@ -76,10 +74,8 @@ $(document).ready(function() {
             $('#messages').append('<li><span class="msgfrom" style="color:'+hex+';" id="'+msg.socketid+'">' + msg.name + '</span>' + msg.messagecontent + '</li>')
 
         }
+        
         $("#messages").scrollTop($("#messages")[0].scrollHeight);
-
-       // console.log(msg.socketid + " name: " + msg.name)
-        //$('#messages').html('<div id="'+msg.socketid+'">'+msg.name +'</div> ' + msg.hours + ":" + msg.minutes + " - " + msg)
     });
 
     socket.on('error message', function(error) {
@@ -101,3 +97,4 @@ $(document).ready(function() {
     });
 
 });
+

@@ -18,25 +18,34 @@ form button {
 
 
 ul {
-    list-style-position: inside;
+    padding-left: 0;
 }
 
-/* id are .
-class are #
+/* id are #
+class are .
 */
 
-#messages {
+.messagebox {
+  position: relative;
+  overflow-y: auto;
   height: 400px;
-  list-style-type: none; 
-  display: block;
-  overflow-y: scroll;
+
 }
 
-.messages {
+#messages {
     color: black;
+    position: absolute;
+    list-style-type: none; 
+    max-height:400px;
+    bottom:0px;
+    overflow-y: scroll;
+    width:100%;
+
 }
+
 #users {
     list-style-type: none; 
+
 }
 .col-md-9{
   background-color: #ede9f0;
